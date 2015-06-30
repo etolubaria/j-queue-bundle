@@ -1,0 +1,22 @@
+{
+    "name": "an1zhegorodov/j-queue-bundle",
+    "description": "Simple queueing for symfony2",
+    "type": "symfony-bundle",
+    "require": {
+        "php": "^5.3.3",
+        "symfony/framework-bundle": "~2.0",
+        "gedmo/doctrine-extensions": "~2.3.1"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Anton Nizhegorodov",
+            "email": "anizh3gorodov@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "An1zhegorodov\\JQueueBundle\\": ""
+        }
+    }
+}
