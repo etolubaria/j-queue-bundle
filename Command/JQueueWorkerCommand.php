@@ -5,12 +5,14 @@ namespace An1zhegorodov\JQueueBundle\Command;
 use An1zhegorodov\JQueueBundle\Entity\Job;
 use An1zhegorodov\JQueueBundle\Entity\JobStatuses;
 use An1zhegorodov\JQueueBundle\Entity\JobTypes;
+use An1zhegorodov\JQueueBundle\Event\Events;
+use An1zhegorodov\JQueueBundle\Event\JobReceivedEvent;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-abstract class AbstractJQueueWorker extends ContainerAwareCommand
+class JQueueWorkerCommand extends ContainerAwareCommand
 {
     protected function configure()
     {
@@ -31,10 +33,13 @@ abstract class AbstractJQueueWorker extends ContainerAwareCommand
         $emOption = $input->getOption('em');
         $jobTypeString = strtoupper($input->getOption('job_type'));
         $id = $input->getOption('id');
+
         if (!is_numeric($expires) || !is_numeric($delay) || !is_numeric($id)) {
             $output->writeln(sprintf('<error>%s</error>', $this->getSynopsis()));
         }
+
         $container = $this->getContainer();
+        $eventDispatcher = $container->get('event_dispatcher');
         $em = $container->get(sprintf('doctrine.orm.%s_entity_manager', $emOption));
         $jobRepository = $em->getRepository('JQueueBundle:Job');
         $endTime = strtotime(sprintf('+%s seconds', $expires));
@@ -42,7 +47,9 @@ abstract class AbstractJQueueWorker extends ContainerAwareCommand
             /** @var Job $job */
             $jobs = $jobRepository->pop($id, constant('\An1zhegorodov\JQueueBundle\Entity\JobTypes::' . $jobTypeString));
             if (!empty($jobs['0']) && ($job = $jobs['0']) instanceof Job) {
-                $this->processJob($job, $input, $output);
+                $jobReceivedEvent = new JobReceivedEvent($job, $input, $output);
+                $eventDispatcher->dispatch(Events::JOB_RECEIVED, $jobReceivedEvent);
+                $job = $jobReceivedEvent->getJob();
                 if ($noKeep) {
                     $em->remove($job);
                 } else {
@@ -53,6 +60,4 @@ abstract class AbstractJQueueWorker extends ContainerAwareCommand
             sleep($delay);
         }
     }
-
-    abstract protected function processJob(Job $job, InputInterface $input, OutputInterface $output);
 }
