@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Job
  *
  * @ORM\Table(name="jqueue_job")
- * @ORM\Entity(repositoryClass="AppBundle\Entity\JobRepository")
+ * @ORM\Entity(repositoryClass="An1zhegorodov\JQueueBundle\Entity\JobRepository")
  */
 class Job extends BaseJob
 {
