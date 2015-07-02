@@ -35,6 +35,16 @@ class BaseJob
     protected $workerId;
 
     /**
+     * @param int $statusId
+     * @param int $workerId
+     */
+    public function __construct($statusId = JobStatuses::SNEW, $workerId = 0)
+    {
+
+        $this->statusId = $statusId;
+        $this->workerId = $workerId;
+    }
+    /**
      * Get id
      *
      * @return integer 

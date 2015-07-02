@@ -11,7 +11,7 @@ use Doctrine\ORM\EntityRepository;
  */
 class JobRepository extends EntityRepository
 {
-    public function pop($workerId, $jobTypeId, $limit = 1)
+    public function pop($workerId, $jobTypeId)
     {
         $em = $this->getEntityManager();
         $connection = $em->getConnection();
@@ -24,8 +24,8 @@ class JobRepository extends EntityRepository
             AND status_id = :new_status_id
             AND worker_id = 0
             ORDER BY created ASC
-            limit %d
-        ', $table, $limit);
+            limit 1
+        ', $table);
         $connection->executeUpdate($query, array(
             ':started_status_id'    => JobStatuses::STARTED,
             ':type_id'              => $jobTypeId,
@@ -37,13 +37,13 @@ class JobRepository extends EntityRepository
         $qb->where('j.typeId = :type_id')
             ->andWhere('j.statusId = :started_status_id')
             ->andWhere('j.workerId = :worker_id')
-            ->setMaxResults($limit);
+            ->setMaxResults(1);
         $qb->setParameters(array(
             'type_id' => $jobTypeId,
             'started_status_id' => JobStatuses::STARTED,
             'worker_id' => $workerId
         ));
 
-        return $qb->getQuery()->getResult();
+        return $qb->getQuery()->getSingleResult();
     }
 }
