@@ -19,6 +19,32 @@ class Configuration implements ConfigurationInterface
     {
         $treeBuilder = new TreeBuilder();
         $rootNode = $treeBuilder->root('j_queue');
+        $rootNode
+            ->children()
+                ->arrayNode('job_types')
+                    ->isRequired()
+                    ->requiresAtLeastOneElement()
+                    ->prototype('array')
+                        ->children()
+                            ->integerNode('id')->end()
+                            ->scalarNode('title')
+                                ->validate()
+                                ->ifTrue(function($v) { return !is_string($v); })
+                                    ->thenInvalid('Title should be string')
+                                ->end()
+                            ->end()
+                        ->end()
+                    ->end()
+                    ->validate()
+                        ->ifTrue(function($v) { return count($v) !== count(array_unique(array_column($v, 'id'))); })
+                            ->thenInvalid('Each job type should have unique identifier')
+                    ->end()
+                    ->validate()
+                        ->ifTrue(function($v) { return count($v) !== count(array_unique(array_column($v, 'title'))); })
+                            ->thenInvalid('Each job type should have unique title')
+                    ->end()
+                ->end()
+            ->end();
 
         // Here you should define the parameters that are allowed to
         // configure your bundle. See the documentation linked above for

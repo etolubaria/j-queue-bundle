@@ -43,6 +43,13 @@ class Job extends BaseJob
      */
     private $updated;
 
+    public function __construct($typeId, array $data, $statusId = JobStatuses::SNEW, $workerId = 0)
+    {
+        parent::__construct($statusId, $workerId);
+        $this->typeId = $typeId;
+        $this->data = $data;
+    }
+
     /**
      * @return int
      */

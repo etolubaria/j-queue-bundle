@@ -31,22 +31,32 @@ class JQueueWorkerCommand extends ContainerAwareCommand
         $expires = $input->getOption('expires');
         $delay = $input->getOption('delay');
         $emOption = $input->getOption('em');
-        $jobTypeString = strtoupper($input->getOption('job_type'));
+        $jobTypeTitle = strtolower($input->getOption('job_type'));
         $id = $input->getOption('id');
 
         if (!is_numeric($expires) || !is_numeric($delay) || !is_numeric($id)) {
             $output->writeln(sprintf('<error>%s</error>', $this->getSynopsis()));
+            return;
         }
 
         $container = $this->getContainer();
         $eventDispatcher = $container->get('event_dispatcher');
         $em = $container->get(sprintf('doctrine.orm.%s_entity_manager', $emOption));
         $jobRepository = $em->getRepository('JQueueBundle:Job');
+
+        $jobTypeId = $container->getParameter(sprintf('jqueue.job_types.%s', $jobTypeTitle));
         $endTime = strtotime(sprintf('+%s seconds', $expires));
+
+        if (!$jobTypeId) {
+            $output->writeln(sprintf('<error>%s</error>', $this->getSynopsis()));
+            $output->writeln(sprintf('<error>%s</error>', 'Invalid job_type'));
+            return;
+        }
+
         while (time() < $endTime) {
             /** @var Job $job */
-            $jobs = $jobRepository->pop($id, constant('\An1zhegorodov\JQueueBundle\Entity\JobTypes::' . $jobTypeString));
-            if (!empty($jobs['0']) && ($job = $jobs['0']) instanceof Job) {
+            $job = $jobRepository->pop($id, $jobTypeId);
+            if ($job instanceof Job) {
                 $jobReceivedEvent = new JobReceivedEvent($job, $input, $output);
                 $eventDispatcher->dispatch(Events::JOB_RECEIVED, $jobReceivedEvent);
                 $job = $jobReceivedEvent->getJob();
