@@ -3,6 +3,8 @@
 namespace An1zhegorodov\JQueueBundle\Entity;
 
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\NoResultException;
+
 /**
  * JobRepository
  *
@@ -44,6 +46,10 @@ class JobRepository extends EntityRepository
             'worker_id' => $workerId
         ));
 
-        return $qb->getQuery()->getSingleResult();
+        try {
+            return $qb->getQuery()->getSingleResult();
+        } catch (NoResultException $e) {
+            return false;
+        }
     }
 }
