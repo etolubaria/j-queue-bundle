@@ -5,7 +5,8 @@
     "require": {
         "php": "^5.3.3",
         "symfony/framework-bundle": "~2.0",
-        "gedmo/doctrine-extensions": "~2.3.1"
+        "gedmo/doctrine-extensions": "~2.3.1",
+        "ramsey/array_column": "^1.1"
     },
     "license": "MIT",
     "authors": [
