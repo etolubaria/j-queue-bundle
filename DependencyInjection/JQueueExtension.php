@@ -30,6 +30,7 @@ class JQueueExtension extends Extension
 
     protected function processJobTypeConfig(array $config, ContainerInterface $container)
     {
+        $config[] = array('id' => 99999999, 'title' => 'default');
         foreach ($config as $item) {
             $parameter = sprintf('jqueue.job_types.%s', $item['title']);
             $value = $item['id'];
